@@ -21,7 +21,7 @@ def input_with_retry(prompt, type_cast, validator=None):
 
 def display_menu():
     print("\n" + "="*40)
-    print("HỆ THỐNG QUẢN LÝ NHÂN VIÊN CÔNG TY ABC") 
+    print("HỆ THỐNG QUẢN LÝ NHÂN SỰ") 
     print("="*40)
     print("1. Thêm nhân viên mới") 
     print("2. Hiển thị danh sách nhân viên") 
@@ -121,16 +121,87 @@ def main():
             print(f"Tổng lương công ty: {format_currency(total)}") 
             
         elif choice == 5:
-            emp_id = input("Nhập ID nhân viên để phân công dự án: ")
-            try:
-                e = company.get_employee(emp_id)
-                proj = input("Nhập tên dự án: ")
-                e.add_project(proj)
-                print("Phân công thành công!")
-            except EmployeeNotFoundError as e:
-                print(e)
-            except ProjectAllocationError as e:
-                print(e) # [cite: 37]
+            print("\n--- QUẢN LÝ DỰ ÁN ---")
+            print("a. Phân công nhân viên vào dự án")
+            print("b. Xóa nhân viên khỏi dự án")
+            print("c. Hiển thị dự án của 1 nhân viên")
+            # --- Các chức năng mới thêm từ ảnh ---
+            print("d. Top 10 nhân viên tham gia nhiều dự án nhất")
+            print("e. Top 10 nhân viên tham gia ít dự án nhất")
+            print("f. Danh sách thành viên tham gia 1 dự án và chức vụ")
+            
+            sub5 = input("Chọn chức năng (a-f): ").lower()
+            
+            if sub5 == 'a':
+                emp_id = input("Nhập ID nhân viên để phân công: ")
+                try:
+                    e = company.get_employee(emp_id)
+                    proj = input("Nhập tên dự án: ")
+                    e.add_project(proj)
+                    print("Phân công thành công!")
+                except EmployeeNotFoundError as e:
+                    print(e)
+                except ProjectAllocationError as e:
+                    print(e)
+                    
+            elif sub5 == 'b':
+                emp_id = input("Nhập ID nhân viên: ")
+                try:
+                    e = company.get_employee(emp_id)
+                    proj = input("Nhập tên dự án cần xóa: ")
+                    if proj in e.projects:
+                        e.projects.remove(proj)
+                        print("Xóa dự án thành công!")
+                    else:
+                        print("Nhân viên không tham gia dự án này.")
+                except EmployeeNotFoundError as e:
+                    print(e)
+                    
+            elif sub5 == 'c':
+                emp_id = input("Nhập ID nhân viên: ")
+                try:
+                    e = company.get_employee(emp_id)
+                    print(f"Các dự án của {e.name}: {', '.join(e.projects) if e.projects else 'Chưa có'}")
+                except EmployeeNotFoundError as e:
+                    print(e)
+                    
+            elif sub5 == 'd':
+                try:
+                    emps = company.get_all_employees()
+                    # Sắp xếp theo số lượng dự án giảm dần, lấy top 10
+                    top_10 = sorted(emps, key=lambda x: len(x.projects), reverse=True)[:10]
+                    print("\n--- TOP 10 NHÂN VIÊN NHIỀU DỰ ÁN NHẤT ---")
+                    for e in top_10:
+                        print(f"ID: {e.emp_id:5} | Tên: {e.name:15} | Số dự án: {len(e.projects)}")
+                except IndexError as e:
+                    print(f"Thông báo: {e}")
+                    
+            elif sub5 == 'e':
+                try:
+                    emps = company.get_all_employees()
+                    # Sắp xếp theo số lượng dự án tăng dần, lấy top 10
+                    bottom_10 = sorted(emps, key=lambda x: len(x.projects))[:10]
+                    print("\n--- TOP 10 NHÂN VIÊN ÍT DỰ ÁN NHẤT ---")
+                    for e in bottom_10:
+                        print(f"ID: {e.emp_id:5} | Tên: {e.name:15} | Số dự án: {len(e.projects)}")
+                except IndexError as e:
+                    print(f"Thông báo: {e}")
+                    
+            elif sub5 == 'f':
+                proj_name = input("Nhập tên dự án cần xem: ")
+                try:
+                    emps = company.get_all_employees()
+                    participants = [e for e in emps if proj_name in e.projects]
+                    if participants:
+                        print(f"\n--- DANH SÁCH THÀNH VIÊN DỰ ÁN '{proj_name}' ---")
+                        for e in participants:
+                            print(f"ID: {e.emp_id:5} | Tên: {e.name:15} | Chức vụ: {e.emp_type}")
+                    else:
+                        print("Không có nhân viên nào tham gia dự án này.")
+                except IndexError as e:
+                    print(f"Thông báo: {e}")
+            else:
+                print("Lựa chọn không hợp lệ!")
                 
         elif choice == 6:
             emp_id = input("Nhập ID nhân viên cần đánh giá: ")
@@ -143,12 +214,98 @@ def main():
                 print(e)
 
         elif choice == 7:
-            emp_id = input("Nhập ID nhân viên cần xóa: ")
-            try:
-                company.remove_employee(emp_id)
-                print("Xóa nhân viên thành công!")
-            except EmployeeNotFoundError as e:
-                print(e) 
+            print("\n--- QUẢN LÝ NHÂN SỰ ---")
+            print("a. Xóa 1 nhân viên (nghỉ việc)")
+            print("b. Tăng lương cơ bản cho nhân viên")
+            print("c. Thăng chức")
+            # --- Chức năng mới thêm từ ảnh ---
+            print("d. Cắt giảm nhân sự (Cho nghỉ việc nhiều nhân viên)")
+            
+            sub7 = input("Chọn chức năng (a-d): ").lower()
+            
+            if sub7 == 'a':
+                emp_id = input("Nhập ID nhân viên cần xóa: ")
+                try:
+                    company.remove_employee(emp_id)
+                    print("Xóa nhân viên thành công!")
+                except EmployeeNotFoundError as e:
+                    print(e)
+                    
+            elif sub7 == 'b':
+                emp_id = input("Nhập ID nhân viên cần tăng lương: ")
+                try:
+                    e = company.get_employee(emp_id)
+                    new_salary = input_with_retry("Nhập mức lương mới: ", float, validate_salary)
+                    e.base_salary = new_salary
+                    print("Cập nhật lương thành công!")
+                except EmployeeNotFoundError as e:
+                    print(e)
+                    
+            elif sub7 == 'c':
+                print("\n--- THĂNG CHỨC NHÂN VIÊN ---")
+                emp_id = input("Nhập ID nhân viên cần thăng chức: ")
+                try:
+                    # Tìm nhân viên hiện tại
+                    emp_to_promote = company.get_employee(emp_id)
+                    
+                    if emp_to_promote.emp_type == "Intern":
+                        print(f"Nhân viên {emp_to_promote.name} hiện là Intern. Thăng chức lên Developer.")
+                        lang = input("Nhập ngôn ngữ lập trình cho vai trò Developer: ")
+                        # Tạo object Developer mới
+                        new_emp = Developer(
+                            emp_to_promote.emp_id, 
+                            emp_to_promote.name, 
+                            emp_to_promote.age, 
+                            emp_to_promote.email, 
+                            emp_to_promote.base_salary, 
+                            lang
+                        )
+                    elif emp_to_promote.emp_type == "Developer":
+                        print(f"Nhân viên {emp_to_promote.name} hiện là Developer. Thăng chức lên Manager.")
+                        # Tạo object Manager mới
+                        new_emp = Manager(
+                            emp_to_promote.emp_id, 
+                            emp_to_promote.name, 
+                            emp_to_promote.age, 
+                            emp_to_promote.email, 
+                            emp_to_promote.base_salary
+                        )
+                    elif emp_to_promote.emp_type == "Manager":
+                        print(f"Nhân viên {emp_to_promote.name} đã là Manager (cấp bậc cao nhất). Không thể thăng chức thêm.")
+                        continue # Bỏ qua phần cập nhật bên dưới
+                        
+                    # Giữ lại danh sách các dự án và điểm hiệu suất cũ của nhân viên
+                    new_emp.projects = emp_to_promote.projects.copy()
+                    new_emp.performance_score = emp_to_promote.performance_score
+                    
+                    # Tìm vị trí của nhân viên cũ trong danh sách và thay thế bằng nhân viên mới
+                    index = company.employees.index(emp_to_promote)
+                    company.employees[index] = new_emp
+                    
+                    print(f"[*] Thăng chức thành công! {new_emp.name} nay đã là {new_emp.emp_type}.")
+                    
+                except EmployeeNotFoundError as err: # Bắt lỗi nếu nhập sai ID
+                    print(err)
+                
+            elif sub7 == 'd':
+                print("\n--- CẮT GIẢM NHÂN SỰ ---")
+                ids_input = input("Nhập danh sách ID các nhân viên cần cho nghỉ việc (cách nhau bằng dấu phẩy, VD: NV01, NV02): ")
+                
+                # Tách chuỗi thành danh sách ID và loại bỏ khoảng trắng dư thừa
+                ids_to_remove = [i.strip() for i in ids_input.split(",") if i.strip()]
+                
+                success_count = 0
+                for emp_id in ids_to_remove:
+                    try:
+                        company.remove_employee(emp_id)
+                        print(f"[+] Đã cho nghỉ việc nhân viên ID: {emp_id}")
+                        success_count += 1
+                    except EmployeeNotFoundError:
+                        print(f"[-] Không tìm thấy ID: {emp_id} để cắt giảm.")
+                        
+                print(f"=> Tổng kết: Đã cắt giảm thành công {success_count}/{len(ids_to_remove)} nhân sự được yêu cầu.")
+            else:
+                print("Lựa chọn không hợp lệ!")
                 
         elif choice == 8:
             try:
